@@ -10,20 +10,11 @@ class Spell(db.Model):
     spell_name = db.Column(db.String(100), unique=True)
     spell_description = db.Column(db.String(1000), default='')
 
-    def __init__(self,
-                 spell_id,
-                 spell_name,
-                 spell_description):
-        self.spell_id = spell_id
-        self.spell_name = spell_name
-        self.spell_description = spell_description
-        # TODO relationship
-
 
 # Spell Schema
 class SpellSchema(ma.Schema):
     class Meta:
-        fields = {
+        fields = [
             'spell_name',
             'spell_description'
-        }
+        ]
