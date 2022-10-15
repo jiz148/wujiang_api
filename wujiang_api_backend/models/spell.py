@@ -4,7 +4,8 @@ Spell Model
 from wujiang_api_backend.db import db, ma
 
 
-class Spell(db.Model):
+class SpellModel(db.Model):
+    __tablename__ = 'spell'
 
     spell_id = db.Column(db.Integer, primary_key=True)
     spell_name = db.Column(db.String(100), unique=True)

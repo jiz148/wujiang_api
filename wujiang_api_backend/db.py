@@ -20,9 +20,13 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 
+def create_app():
+    return app
+
+
 def create_db():
-    from wujiang_api_backend.models.unit import Unit
-    from wujiang_api_backend.models.spell import Spell
-    from wujiang_api_backend.models.property import Property
+    from wujiang_api_backend.models.unit import UnitModel
+    from wujiang_api_backend.models.spell import SpellModel
+    from wujiang_api_backend.models.property import PropertyModel
     with app.app_context():
         db.create_all()
