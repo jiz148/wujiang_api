@@ -2,8 +2,8 @@
 Unit Model
 """
 from wujiang_api_backend.db import db, ma
-from wujiang_api_backend.models.spell import SpellModel
-from wujiang_api_backend.models.property import PropertyModel
+from wujiang_api_backend.models.spell import SpellModel, SpellSchema
+from wujiang_api_backend.models.property import PropertyModel, PropertySchema
 
 
 class UnitModel(db.Model):
@@ -37,6 +37,7 @@ class UnitModel(db.Model):
 # Unit Schema
 class UnitSchema(ma.Schema):
     class Meta:
+        model = UnitModel
         fields = [
             'unit_id',
             'unit_name',
@@ -50,3 +51,6 @@ class UnitSchema(ma.Schema):
             'spell',
             'property',
         ]
+
+    spell = ma.Nested(SpellSchema(many=True))
+    property = ma.Nested(PropertySchema(many=True))

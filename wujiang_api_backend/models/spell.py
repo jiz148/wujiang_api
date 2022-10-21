@@ -15,6 +15,7 @@ class SpellModel(db.Model):
 # Spell Schema
 class SpellSchema(ma.Schema):
     class Meta:
+        model = SpellModel
         fields = [
             'spell_name',
             'spell_description'
