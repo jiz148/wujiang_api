@@ -17,6 +17,7 @@ class PropertySchema(ma.Schema):
     class Meta:
         model = PropertyModel
         fields = [
+            'property_id',
             'property_name',
             'property_description'
         ]
