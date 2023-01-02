@@ -55,6 +55,26 @@ class Units(Resource):
         return jsonify(response)
 
 
+units_by_spell_get_args = reqparse.RequestParser()
+units_by_spell_get_args.add_argument("spellId", type=str, required=True)
+
+
+class UnitsBySpell(Resource):
+
+    @staticmethod
+    def get():
+        args = units_by_spell_get_args.parse_args()
+        spell_id = args['spellId']
+        spell = db.session.query(SpellModel).filter(SpellModel.spell_id == spell_id).first()
+        results = db.session.query(UnitModel)\
+            .filter(UnitModel.spell.contains(spell)).all()
+        units = UnitSchema(many=True).dump(results)
+        response = {
+            'list': units
+        }
+        return jsonify(response)
+
+
 unit_post_args = reqparse.RequestParser()
 unit_post_args.add_argument("unit_name", type=str, required=True)
 unit_post_args.add_argument("level", type=int, required=True)
