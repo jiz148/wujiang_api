@@ -3,6 +3,8 @@ Unit Resource
 """
 from flask import jsonify, make_response
 from flask_restful import Resource, reqparse, abort
+from sqlalchemy.sql import text
+from sqlalchemy.exc import OperationalError
 
 from wujiang_api_backend.db import db
 from wujiang_api_backend.models.unit import UnitModel, UnitSchema
@@ -10,14 +12,47 @@ from wujiang_api_backend.models.spell import SpellModel
 from wujiang_api_backend.models.property import PropertyModel
 
 
+units_get_args = reqparse.RequestParser()
+units_get_args.add_argument("pageNum", type=int, required=True)
+units_get_args.add_argument("pageSize", type=int, required=True)
+units_get_args.add_argument("sortName", type=str, required=False)
+units_get_args.add_argument("sortOrder", type=str, required=False)
+units_get_args.add_argument("name", type=str, required=False)
+
+
 class Units(Resource):
 
     @staticmethod
     def get():
+        args = units_get_args.parse_args()
+        page_num = args['pageNum']
+        page_size = args['pageSize']
 
-        all_units = UnitModel.query.all()
-        result = UnitSchema(many=True).dump(all_units)
-        return jsonify(result)
+        sort_name = args.get('sortName')
+        sort_order = args.get('sortOrder')
+        name = args.get('name')
+
+        results = db.session.query(UnitModel)
+
+        if sort_name:
+            sort_order = 'desc' if sort_order == 'descend' else 'asc'
+            order_text = sort_name + ' ' + sort_order
+            results = results.order_by(text(order_text))
+
+        if name:
+            name = '%' + name + '%'
+            results = results.filter(UnitModel.unit_name.like(name))
+
+        try:
+            results = results.paginate(page=page_num, per_page=page_size)
+        except OperationalError:
+            abort(400, msg='sql query error')
+        units = UnitSchema(many=True).dump(results)
+        response = {
+            'total': len(units),
+            'list': units
+        }
+        return jsonify(response)
 
 
 unit_post_args = reqparse.RequestParser()
@@ -35,7 +70,8 @@ unit_post_args.add_argument("properties", type=int, action='append', required=Tr
 
 class Unit(Resource):
 
-    def post(self):
+    @staticmethod
+    def post():
         args = unit_post_args.parse_args()
         if db.session.query(UnitModel).filter(UnitModel.unit_name == args['unit_name']).all():
             abort(409, msg='Username already exists')

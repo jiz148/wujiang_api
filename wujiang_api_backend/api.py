@@ -15,8 +15,8 @@ from wujiang_api_backend.resources.property import \
 app = create_app()
 api = Api(app)
 
-api.add_resource(Units, '/units')
-api.add_resource(Unit, '/unit')
+api.add_resource(Units, '/unit/getUnitList')
+api.add_resource(Unit, '/unit/getUnitDetail')
 api.add_resource(Spells, '/spells')
 api.add_resource(Spell, '/spell')
 api.add_resource(Properties, '/properties')
