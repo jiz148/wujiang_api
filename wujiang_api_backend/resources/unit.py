@@ -130,7 +130,7 @@ class UnitAdd(Resource):
     def post():
         args = unit_post_args.parse_args()
         if db.session.query(UnitModel).filter(UnitModel.unit_name == args['unit_name']).all():
-            abort(409, msg='Username already exists')
+            abort(409, msg='unit name already exists')
         # check spell availability
         for spell_id in args['spells']:
             if not db.session.query(SpellModel).filter(SpellModel.spell_id == spell_id).all():
@@ -162,3 +162,80 @@ class UnitAdd(Resource):
         db.session.add(unit)
         db.session.commit()
         return make_response(UnitSchema().dump(unit), 201)
+
+
+unit_update_args = reqparse.RequestParser()
+unit_update_args.add_argument("unit_id", type=str, required=True)
+unit_update_args.add_argument("unit_name", type=str, required=True)
+unit_update_args.add_argument("level", type=int, required=True)
+unit_update_args.add_argument("attack", type=int, required=True)
+unit_update_args.add_argument("defence", type=int, required=True)
+unit_update_args.add_argument("speed", type=int, required=True)
+unit_update_args.add_argument("range", type=int, required=True)
+unit_update_args.add_argument("magic", type=int, required=True)
+unit_update_args.add_argument("is_wujiang", type=bool, required=True)
+unit_update_args.add_argument("spells", type=int, action='append', required=True)
+unit_update_args.add_argument("properties", type=int, action='append', required=True)
+
+
+class UnitUpdate(Resource):
+    
+    def put(self):
+        args = unit_update_args.parse_args()
+        # check unit availability
+        unit = db.session.query(UnitModel).filter(UnitModel.unit_id == args['unit_id']).first()
+        if not unit:
+            abort(404, msg='unit does not exist')
+        original_name = unit.unit_name
+        if args['unit_name'] != original_name:
+            # check new name availability
+            if db.session.query(UnitModel).filter(UnitModel.unit_name == args['unit_name']).all():
+                abort(404, msg='unit name already exists')
+        # check spell availability
+        for spell_id in args['spells']:
+            if not db.session.query(SpellModel).filter(SpellModel.spell_id == spell_id).all():
+                abort(404, msg='Spell does not exist')
+
+        # check property availability
+        for property_id in args['properties']:
+            if not db.session.query(PropertyModel).filter(PropertyModel.property_id == property_id).all():
+                abort(404, msg='Property does not exist')
+        # update unit
+        unit.unit_name = args['unit_name']
+        unit.level = args['level']
+        unit.attack = args['attack']
+        unit.defence = args['defence']
+        unit.speed = args['speed']
+        unit.range = args['range']
+        unit.magic = args['magic']
+        unit.is_wujiang = args['is_wujiang']
+
+        # add spells
+        unit.spell = []
+        for spell_id in set(args['spells']):
+            spell = db.session.query(SpellModel).filter(SpellModel.spell_id == spell_id).first()
+            unit.spell.append(spell)
+        unit.property = []
+        for property_id in set(args['properties']):
+            property = db.session.query(PropertyModel).filter(PropertyModel.property_id == property_id).first()
+            unit.property.append(property)
+
+        db.session.commit()
+        return make_response(UnitSchema().dump(unit), 201)
+
+
+unit_delete_args = reqparse.RequestParser()
+unit_delete_args.add_argument("id", type=str, required=True)
+
+
+class UnitDelete(Resource):
+
+    def delete(self):
+        args = unit_delete_args.parse_args()
+        if not db.session.query(UnitModel).filter(UnitModel.unit_id == args['id']).first():
+            abort(404, msg='unit does not exist')
+        try:
+            db.session.query(UnitModel).filter(UnitModel.unit_id == args['id']).delete()
+        except:
+            abort(404, msg="error happened in delete")
+        db.session.commit()

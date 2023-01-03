@@ -6,7 +6,9 @@ from wujiang_api_backend.resources.unit import \
     UnitsBySpell, \
     UnitsByProperty, \
     UnitDetail, \
-    UnitAdd
+    UnitAdd, \
+    UnitUpdate, \
+    UnitDelete
 from wujiang_api_backend.resources.spell import \
     Spells, \
     Spell
@@ -23,6 +25,8 @@ api.add_resource(UnitsBySpell, '/unit/getUnitListBySpell')
 api.add_resource(UnitsByProperty, '/unit/getUnitListByProperty')
 api.add_resource(UnitDetail, '/unit/getUnitDetail')
 api.add_resource(UnitAdd, '/unit/addUnit')
+api.add_resource(UnitDelete, '/unit/deleteUnit')
+api.add_resource(UnitUpdate, '/unit/editUnit')
 api.add_resource(Spells, '/spells')
 api.add_resource(Spell, '/spell')
 api.add_resource(Properties, '/properties')
