@@ -18,7 +18,11 @@ from wujiang_api_backend.resources.spell import \
     SpellDelete
 from wujiang_api_backend.resources.property import \
     Properties, \
-    Property
+    PropertiesByUnit, \
+    Property, \
+    PropertyDetail, \
+    PropertyUpdate, \
+    PropertyDelete
 
 
 app = create_app()
@@ -37,8 +41,12 @@ api.add_resource(SpellDetail, '/spell/getSpellDetail')
 api.add_resource(Spell, '/spell/addSpell')
 api.add_resource(SpellUpdate, '/spell/editSpell')
 api.add_resource(SpellDelete, '/spell/deleteSpell')
-api.add_resource(Properties, '/properties')
-api.add_resource(Property, '/property')
+api.add_resource(Properties, '/property/getPropertyList')
+api.add_resource(PropertiesByUnit, '/property/getPropertyListByUnit')
+api.add_resource(PropertyDetail, '/property/getPropertyDetail')
+api.add_resource(Property, '/property/addProperty')
+api.add_resource(PropertyUpdate, '/property/editProperty')
+api.add_resource(PropertyDelete, '/property/deleteProperty')
 
 
 if __name__ == '__main__':
