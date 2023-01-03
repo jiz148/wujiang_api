@@ -75,6 +75,26 @@ class UnitsBySpell(Resource):
         return jsonify(response)
 
 
+units_by_property_get_args = reqparse.RequestParser()
+units_by_property_get_args.add_argument("propertyId", type=str, required=True)
+
+
+class UnitsByProperty(Resource):
+
+    @staticmethod
+    def get():
+        args = units_by_property_get_args.parse_args()
+        property_id = args['propertyId']
+        property = db.session.query(PropertyModel).filter(PropertyModel.property_id == property_id).first()
+        results = db.session.query(UnitModel)\
+            .filter(UnitModel.property.contains(property)).all()
+        units = UnitSchema(many=True).dump(results)
+        response = {
+            'list': units
+        }
+        return jsonify(response)
+
+
 unit_post_args = reqparse.RequestParser()
 unit_post_args.add_argument("unit_name", type=str, required=True)
 unit_post_args.add_argument("level", type=int, required=True)
