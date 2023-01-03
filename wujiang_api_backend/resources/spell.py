@@ -139,3 +139,20 @@ class SpellUpdate(Resource):
 
         db.session.commit()
         return make_response(SpellSchema().dump(spell), 201)
+
+
+spell_delete_args = reqparse.RequestParser()
+spell_delete_args.add_argument("id", type=str, required=True)
+
+
+class SpellDelete(Resource):
+
+    def delete(self):
+        args = spell_delete_args.parse_args()
+        if not db.session.query(SpellModel).filter(SpellModel.spell_id == args['id']).first():
+            abort(404, msg='spell does not exist')
+        try:
+            db.session.query(SpellModel).filter(SpellModel.spell_id == args['id']).delete()
+        except:
+            abort(404, msg="error happened in delete")
+        db.session.commit()
