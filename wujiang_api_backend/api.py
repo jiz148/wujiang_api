@@ -32,7 +32,7 @@ api.add_resource(UnitUpdate, '/unit/editUnit')
 api.add_resource(Spells, '/spell/getSpellList')
 api.add_resource(SpellsByUnit, '/spell/getSpellListByUnit')
 api.add_resource(SpellDetail, '/spell/getSpellDetail')
-api.add_resource(Spell, '/spell')
+api.add_resource(Spell, '/spell/addSpell')
 api.add_resource(Properties, '/properties')
 api.add_resource(Property, '/property')
 
