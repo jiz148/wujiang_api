@@ -97,3 +97,18 @@ class SpellsByUnit(Resource):
         }
         return jsonify(response)
 
+
+spell_detail_get_args = reqparse.RequestParser()
+spell_detail_get_args.add_argument("id", type=str, required=True)
+
+
+class SpellDetail(Resource):
+
+    @staticmethod
+    def get():
+        args = spell_detail_get_args.parse_args()
+        spell_id = args['id']
+        spell = db.session.query(SpellModel).filter(SpellModel.spell_id == spell_id).first()
+        if not spell:
+            abort(404, msg='Spell does not exist')
+        return jsonify(SpellSchema().dump(spell))
