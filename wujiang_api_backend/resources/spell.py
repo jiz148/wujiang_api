@@ -8,6 +8,7 @@ from sqlalchemy.exc import OperationalError
 
 from wujiang_api_backend.db import db
 from wujiang_api_backend.models.spell import SpellModel, SpellSchema
+from wujiang_api_backend.models.unit import UnitModel
 
 
 spells_get_args = reqparse.RequestParser()
@@ -74,3 +75,25 @@ class Spell(Resource):
         db.session.add(spell)
         db.session.commit()
         return make_response(SpellSchema().dump(spell), 201)
+
+
+spell_by_unit_get_args = reqparse.RequestParser()
+spell_by_unit_get_args.add_argument("unitId", type=str, required=True)
+
+
+class SpellsByUnit(Resource):
+
+    @staticmethod
+    def get():
+        args = spell_by_unit_get_args.parse_args()
+        unit_id = args['unitId']
+        unit = db.session.query(UnitModel).filter(UnitModel.unit_id == unit_id).first()
+        if not unit:
+            abort(404, msg='unit does not exist')
+        results = unit.spell
+        spells = SpellSchema(many=True).dump(results)
+        response = {
+            'list': spells
+        }
+        return jsonify(response)
+
