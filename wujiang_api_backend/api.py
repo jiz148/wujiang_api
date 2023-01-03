@@ -13,7 +13,8 @@ from wujiang_api_backend.resources.spell import \
     Spells, \
     SpellsByUnit, \
     Spell, \
-    SpellDetail
+    SpellDetail, \
+    SpellUpdate
 from wujiang_api_backend.resources.property import \
     Properties, \
     Property
@@ -33,6 +34,7 @@ api.add_resource(Spells, '/spell/getSpellList')
 api.add_resource(SpellsByUnit, '/spell/getSpellListByUnit')
 api.add_resource(SpellDetail, '/spell/getSpellDetail')
 api.add_resource(Spell, '/spell/addSpell')
+api.add_resource(SpellUpdate, '/spell/editSpell')
 api.add_resource(Properties, '/properties')
 api.add_resource(Property, '/property')
 

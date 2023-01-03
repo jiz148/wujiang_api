@@ -112,3 +112,30 @@ class SpellDetail(Resource):
         if not spell:
             abort(404, msg='Spell does not exist')
         return jsonify(SpellSchema().dump(spell))
+
+
+spell_put_args = reqparse.RequestParser()
+spell_put_args.add_argument("spell_id", type=str, required=True)
+spell_put_args.add_argument("name", type=str, required=True)
+spell_put_args.add_argument("description", type=str, required=True)
+
+
+class SpellUpdate(Resource):
+
+    @staticmethod
+    def put():
+        args = spell_put_args.parse_args()
+        # check spell availability
+        spell = db.session.query(SpellModel).filter(SpellModel.spell_id == args['spell_id']).first()
+        if not spell:
+            abort(404, msg='spell does not exist')
+        original_name = spell.spell_name
+        if original_name != args['name']:
+            # check spell name availability
+            if db.session.query(SpellModel).filter(SpellModel.spell_name == args['name']).all():
+                abort(409, msg='spell name already exists')
+        spell.spell_name = args['name']
+        spell.spell_description = args['description']
+
+        db.session.commit()
+        return make_response(SpellSchema().dump(spell), 201)
