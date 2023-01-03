@@ -99,6 +99,18 @@ unit_get_args = reqparse.RequestParser()
 unit_get_args.add_argument("id", type=str, required=True)
 
 
+class UnitDetail(Resource):
+
+    @staticmethod
+    def get():
+        args = unit_get_args.parse_args()
+        unit_id = args['id']
+        unit = db.session.query(UnitModel).filter(UnitModel.unit_id == unit_id).first()
+        if not unit:
+            abort(404, msg='Unit does not exist')
+        return jsonify(UnitSchema().dump(unit))
+
+
 unit_post_args = reqparse.RequestParser()
 unit_post_args.add_argument("unit_name", type=str, required=True)
 unit_post_args.add_argument("level", type=int, required=True)
@@ -112,16 +124,7 @@ unit_post_args.add_argument("spells", type=int, action='append', required=True)
 unit_post_args.add_argument("properties", type=int, action='append', required=True)
 
 
-class Unit(Resource):
-
-    @staticmethod
-    def get():
-        args = unit_get_args.parse_args()
-        unit_id = args['id']
-        unit = db.session.query(UnitModel).filter(UnitModel.unit_id == unit_id).first()
-        if not unit:
-            abort(404, msg='Unit does not exist')
-        return jsonify(UnitSchema().dump(unit))
+class UnitAdd(Resource):
 
     @staticmethod
     def post():
