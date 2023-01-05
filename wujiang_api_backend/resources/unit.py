@@ -1,7 +1,7 @@
 """
 Unit Resource
 """
-from flask import jsonify, make_response
+from flask import jsonify, make_response, request
 from flask_restful import Resource, reqparse, abort
 from sqlalchemy.sql import text
 from sqlalchemy.exc import OperationalError
@@ -12,21 +12,13 @@ from wujiang_api_backend.models.spell import SpellModel
 from wujiang_api_backend.models.property import PropertyModel
 
 
-units_get_args = reqparse.RequestParser()
-units_get_args.add_argument("pageNum", type=int, required=True)
-units_get_args.add_argument("pageSize", type=int, required=True)
-units_get_args.add_argument("sortName", type=str, required=False)
-units_get_args.add_argument("sortOrder", type=str, required=False)
-units_get_args.add_argument("name", type=str, required=False)
-
-
 class Units(Resource):
 
     @staticmethod
     def get():
-        args = units_get_args.parse_args()
-        page_num = args['pageNum']
-        page_size = args['pageSize']
+        args = request.args
+        page_num = int(args['pageNum'])
+        page_size = int(args['pageSize'])
 
         sort_name = args.get('sortName')
         sort_order = args.get('sortOrder')
@@ -48,9 +40,13 @@ class Units(Resource):
         except OperationalError:
             abort(400, msg='sql query error')
         units = UnitSchema(many=True).dump(results)
-        response = {
+        data = {
             'total': len(units),
             'list': units
+        }
+        response = {
+            'code': 200,
+            'data': data
         }
         return jsonify(response)
 
@@ -70,7 +66,10 @@ class UnitsBySpell(Resource):
             .filter(UnitModel.spell.contains(spell)).all()
         units = UnitSchema(many=True).dump(results)
         response = {
-            'list': units
+            'code': 200,
+            'data': {
+                'list': units
+            }
         }
         return jsonify(response)
 
@@ -90,25 +89,28 @@ class UnitsByProperty(Resource):
             .filter(UnitModel.property.contains(property)).all()
         units = UnitSchema(many=True).dump(results)
         response = {
-            'list': units
+            'code': 200,
+            'data': {
+                'list': units
+            }
         }
         return jsonify(response)
-
-
-unit_get_args = reqparse.RequestParser()
-unit_get_args.add_argument("id", type=str, required=True)
 
 
 class UnitDetail(Resource):
 
     @staticmethod
     def get():
-        args = unit_get_args.parse_args()
+        args = request.args
         unit_id = args['id']
         unit = db.session.query(UnitModel).filter(UnitModel.unit_id == unit_id).first()
         if not unit:
             abort(404, msg='Unit does not exist')
-        return jsonify(UnitSchema().dump(unit))
+        response = {
+            'code': 200,
+            'data': UnitSchema().dump(unit),
+        }
+        return jsonify(response)
 
 
 unit_post_args = reqparse.RequestParser()
@@ -120,8 +122,8 @@ unit_post_args.add_argument("speed", type=int, required=True)
 unit_post_args.add_argument("range", type=int, required=True)
 unit_post_args.add_argument("magic", type=int, required=True)
 unit_post_args.add_argument("is_wujiang", type=bool, required=True)
-unit_post_args.add_argument("spells", type=int, action='append', required=True)
-unit_post_args.add_argument("properties", type=int, action='append', required=True)
+unit_post_args.add_argument("spells", type=int, action='append', default=list)
+unit_post_args.add_argument("properties", type=int, action='append', default=list)
 
 
 class UnitAdd(Resource):
@@ -161,7 +163,11 @@ class UnitAdd(Resource):
 
         db.session.add(unit)
         db.session.commit()
-        return make_response(UnitSchema().dump(unit), 201)
+        response = {
+            'code': 201,
+            'data': UnitSchema().dump(unit),
+        }
+        return make_response(response, 201)
 
 
 unit_update_args = reqparse.RequestParser()
@@ -174,8 +180,8 @@ unit_update_args.add_argument("speed", type=int, required=True)
 unit_update_args.add_argument("range", type=int, required=True)
 unit_update_args.add_argument("magic", type=int, required=True)
 unit_update_args.add_argument("is_wujiang", type=bool, required=True)
-unit_update_args.add_argument("spells", type=int, action='append', required=True)
-unit_update_args.add_argument("properties", type=int, action='append', required=True)
+unit_update_args.add_argument("spells", type=int, action='append', default=list)
+unit_update_args.add_argument("properties", type=int, action='append', default=list)
 
 
 class UnitUpdate(Resource):
@@ -221,17 +227,17 @@ class UnitUpdate(Resource):
             unit.property.append(property)
 
         db.session.commit()
-        return make_response(UnitSchema().dump(unit), 201)
-
-
-unit_delete_args = reqparse.RequestParser()
-unit_delete_args.add_argument("id", type=str, required=True)
+        response = {
+            'code': 201,
+            'data': UnitSchema().dump(unit),
+        }
+        return make_response(response, 201)
 
 
 class UnitDelete(Resource):
 
     def delete(self):
-        args = unit_delete_args.parse_args()
+        args = request.args
         if not db.session.query(UnitModel).filter(UnitModel.unit_id == args['id']).first():
             abort(404, msg='unit does not exist')
         try:
