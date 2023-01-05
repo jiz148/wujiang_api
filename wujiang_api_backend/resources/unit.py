@@ -51,15 +51,11 @@ class Units(Resource):
         return jsonify(response)
 
 
-units_by_spell_get_args = reqparse.RequestParser()
-units_by_spell_get_args.add_argument("spellId", type=str, required=True)
-
-
 class UnitsBySpell(Resource):
 
     @staticmethod
     def get():
-        args = units_by_spell_get_args.parse_args()
+        args = request.args
         spell_id = args['spellId']
         spell = db.session.query(SpellModel).filter(SpellModel.spell_id == spell_id).first()
         results = db.session.query(UnitModel)\
@@ -74,15 +70,11 @@ class UnitsBySpell(Resource):
         return jsonify(response)
 
 
-units_by_property_get_args = reqparse.RequestParser()
-units_by_property_get_args.add_argument("propertyId", type=str, required=True)
-
-
 class UnitsByProperty(Resource):
 
     @staticmethod
     def get():
-        args = units_by_property_get_args.parse_args()
+        args = request.args
         property_id = args['propertyId']
         property = db.session.query(PropertyModel).filter(PropertyModel.property_id == property_id).first()
         results = db.session.query(UnitModel)\

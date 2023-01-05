@@ -1,7 +1,7 @@
 """
 Spell Resource
 """
-from flask import jsonify, make_response
+from flask import jsonify, make_response, request
 from flask_restful import Resource, reqparse, abort
 from sqlalchemy.sql import text
 from sqlalchemy.exc import OperationalError
@@ -11,19 +11,11 @@ from wujiang_api_backend.models.spell import SpellModel, SpellSchema
 from wujiang_api_backend.models.unit import UnitModel
 
 
-spells_get_args = reqparse.RequestParser()
-spells_get_args.add_argument("pageNum", type=int, required=True)
-spells_get_args.add_argument("pageSize", type=int, required=True)
-spells_get_args.add_argument("sortName", type=str, required=False)
-spells_get_args.add_argument("sortOrder", type=str, required=False)
-spells_get_args.add_argument("name", type=str, required=False)
-
-
 class Spells(Resource):
 
     @staticmethod
     def get():
-        args = spells_get_args.parse_args()
+        args = request.args
         page_num = args['pageNum']
         page_size = args['pageSize']
 
@@ -47,9 +39,13 @@ class Spells(Resource):
         except OperationalError:
             abort(400, msg='sql query error')
         spells = SpellSchema(many=True).dump(results)
-        response = {
+        data = {
             'total': len(spells),
             'list': spells
+        }
+        response = {
+            'code': 200,
+            'data': data
         }
         return jsonify(response)
 
@@ -74,18 +70,18 @@ class Spell(Resource):
 
         db.session.add(spell)
         db.session.commit()
-        return make_response(SpellSchema().dump(spell), 201)
-
-
-spell_by_unit_get_args = reqparse.RequestParser()
-spell_by_unit_get_args.add_argument("unitId", type=str, required=True)
+        response = {
+            'code': 201,
+            'data': SpellSchema().dump(spell)
+        }
+        return make_response(response, 201)
 
 
 class SpellsByUnit(Resource):
 
     @staticmethod
     def get():
-        args = spell_by_unit_get_args.parse_args()
+        args = request.args
         unit_id = args['unitId']
         unit = db.session.query(UnitModel).filter(UnitModel.unit_id == unit_id).first()
         if not unit:
@@ -93,25 +89,28 @@ class SpellsByUnit(Resource):
         results = unit.spell
         spells = SpellSchema(many=True).dump(results)
         response = {
-            'list': spells
+            'code': 200,
+            'data': {
+                'list': spells
+            }
         }
         return jsonify(response)
-
-
-spell_detail_get_args = reqparse.RequestParser()
-spell_detail_get_args.add_argument("id", type=str, required=True)
 
 
 class SpellDetail(Resource):
 
     @staticmethod
     def get():
-        args = spell_detail_get_args.parse_args()
+        args = request.args
         spell_id = args['id']
         spell = db.session.query(SpellModel).filter(SpellModel.spell_id == spell_id).first()
         if not spell:
             abort(404, msg='Spell does not exist')
-        return jsonify(SpellSchema().dump(spell))
+        response = {
+            'code': 200,
+            'data': SpellSchema().dump(spell)
+        }
+        return jsonify(response)
 
 
 spell_put_args = reqparse.RequestParser()
@@ -138,17 +137,17 @@ class SpellUpdate(Resource):
         spell.spell_description = args['description']
 
         db.session.commit()
-        return make_response(SpellSchema().dump(spell), 201)
-
-
-spell_delete_args = reqparse.RequestParser()
-spell_delete_args.add_argument("id", type=str, required=True)
+        response = {
+            'code': 201,
+            'data': SpellSchema().dump(spell)
+        }
+        return make_response(response, 201)
 
 
 class SpellDelete(Resource):
 
     def delete(self):
-        args = spell_delete_args.parse_args()
+        args = request.args
         if not db.session.query(SpellModel).filter(SpellModel.spell_id == args['id']).first():
             abort(404, msg='spell does not exist')
         try:
