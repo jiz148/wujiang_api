@@ -16,8 +16,8 @@ class Spells(Resource):
     @staticmethod
     def get():
         args = request.args
-        page_num = args['pageNum']
-        page_size = args['pageSize']
+        page_num = int(args['pageNum'])
+        page_size = int(args['pageSize'])
 
         sort_name = args.get('sortName')
         sort_order = args.get('sortOrder')

@@ -34,6 +34,7 @@ class Units(Resource):
         if name:
             name = '%' + name + '%'
             results = results.filter(UnitModel.unit_name.like(name))
+        count = results.count()
 
         try:
             results = results.paginate(page=page_num, per_page=page_size)
@@ -41,7 +42,7 @@ class Units(Resource):
             abort(400, msg='sql query error')
         units = UnitSchema(many=True).dump(results)
         data = {
-            'total': len(units),
+            'total': count,
             'list': units
         }
         response = {
@@ -164,16 +165,16 @@ class UnitAdd(Resource):
 
 unit_update_args = reqparse.RequestParser()
 unit_update_args.add_argument("unit_id", type=str, required=True)
-unit_update_args.add_argument("unit_name", type=str, required=True)
-unit_update_args.add_argument("level", type=int, required=True)
-unit_update_args.add_argument("attack", type=int, required=True)
-unit_update_args.add_argument("defence", type=int, required=True)
-unit_update_args.add_argument("speed", type=int, required=True)
-unit_update_args.add_argument("range", type=int, required=True)
-unit_update_args.add_argument("magic", type=int, required=True)
-unit_update_args.add_argument("is_wujiang", type=bool, required=True)
-unit_update_args.add_argument("spells", type=int, action='append', default=list)
-unit_update_args.add_argument("properties", type=int, action='append', default=list)
+unit_update_args.add_argument("unit_name", type=str, required=False)
+unit_update_args.add_argument("level", type=int, required=False)
+unit_update_args.add_argument("attack", type=int, required=False)
+unit_update_args.add_argument("defence", type=int, required=False)
+unit_update_args.add_argument("speed", type=int, required=False)
+unit_update_args.add_argument("range", type=int, required=False)
+unit_update_args.add_argument("magic", type=int, required=False)
+unit_update_args.add_argument("is_wujiang", type=bool, required=False)
+unit_update_args.add_argument("spells", type=int, action='append', required=False)
+unit_update_args.add_argument("properties", type=int, action='append', required=False)
 
 
 class UnitUpdate(Resource):
@@ -184,39 +185,64 @@ class UnitUpdate(Resource):
         unit = db.session.query(UnitModel).filter(UnitModel.unit_id == args['unit_id']).first()
         if not unit:
             abort(404, msg='unit does not exist')
-        original_name = unit.unit_name
-        if args['unit_name'] != original_name:
-            # check new name availability
-            if db.session.query(UnitModel).filter(UnitModel.unit_name == args['unit_name']).all():
-                abort(404, msg='unit name already exists')
-        # check spell availability
-        for spell_id in args['spells']:
-            if not db.session.query(SpellModel).filter(SpellModel.spell_id == spell_id).all():
-                abort(404, msg='Spell does not exist')
 
-        # check property availability
-        for property_id in args['properties']:
-            if not db.session.query(PropertyModel).filter(PropertyModel.property_id == property_id).all():
-                abort(404, msg='Property does not exist')
+        unit_name = args.get('unit_name')
+        level = args.get('level')
+        attack = args.get('attack')
+        defence = args.get('defence')
+        speed = args.get('speed')
+        unit_range = args.get('range')
+        magic = args.get('magic')
+        is_wujiang = args.get('is_wujiang')
+        spells = args.get('spells')
+        properties = args.get('properties')
+
+        if unit_name:
+            original_name = unit.unit_name
+            if unit_name != original_name:
+                # check new name availability
+                if db.session.query(UnitModel).filter(UnitModel.unit_name == args['unit_name']).all():
+                    abort(404, msg='unit name already exists')
+        if spells:
+            # check spell availability
+            for spell_id in spells:
+                if not db.session.query(SpellModel).filter(SpellModel.spell_id == spell_id).all():
+                    abort(404, msg='Spell does not exist')
+
+        if properties:
+            # check property availability
+            for property_id in properties:
+                if not db.session.query(PropertyModel).filter(PropertyModel.property_id == property_id).all():
+                    abort(404, msg='Property does not exist')
+
         # update unit
-        unit.unit_name = args['unit_name']
-        unit.level = args['level']
-        unit.attack = args['attack']
-        unit.defence = args['defence']
-        unit.speed = args['speed']
-        unit.range = args['range']
-        unit.magic = args['magic']
-        unit.is_wujiang = args['is_wujiang']
-
+        if unit_name:
+            unit.unit_name = unit_name
+        if level:
+            unit.level = level
+        if attack:
+            unit.attack = attack
+        if defence:
+            unit.defence = defence
+        if speed:
+            unit.speed = speed
+        if unit_range:
+            unit.range = unit_range
+        if magic:
+            unit.magic = magic
+        if is_wujiang:
+            unit.is_wujiang = is_wujiang
         # add spells
-        unit.spell = []
-        for spell_id in set(args['spells']):
-            spell = db.session.query(SpellModel).filter(SpellModel.spell_id == spell_id).first()
-            unit.spell.append(spell)
-        unit.property = []
-        for property_id in set(args['properties']):
-            property = db.session.query(PropertyModel).filter(PropertyModel.property_id == property_id).first()
-            unit.property.append(property)
+        if spells:
+            unit.spell = []
+            for spell_id in set(spells):
+                spell = db.session.query(SpellModel).filter(SpellModel.spell_id == spell_id).first()
+                unit.spell.append(spell)
+        if properties:
+            unit.property = []
+            for property_id in set(properties):
+                property = db.session.query(PropertyModel).filter(PropertyModel.property_id == property_id).first()
+                unit.property.append(property)
 
         db.session.commit()
         response = {
