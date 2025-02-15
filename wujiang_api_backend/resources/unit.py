@@ -109,6 +109,7 @@ class UnitDetail(Resource):
 unit_post_args = reqparse.RequestParser()
 unit_post_args.add_argument("unit_name", type=str, required=True)
 unit_post_args.add_argument("level", type=int, required=True)
+unit_post_args.add_argument("build_slots", type=int, required=True)
 unit_post_args.add_argument("attack", type=int, required=True)
 unit_post_args.add_argument("defence", type=int, required=True)
 unit_post_args.add_argument("speed", type=int, required=True)
@@ -139,6 +140,7 @@ class UnitAdd(Resource):
         unit = UnitModel(
             unit_name=args['unit_name'],
             level=args['level'],
+            build_slots=args['build_slots'],
             attack=args['attack'],
             defence=args['defence'],
             speed=args['speed'],
@@ -167,6 +169,7 @@ unit_update_args = reqparse.RequestParser()
 unit_update_args.add_argument("unit_id", type=str, required=True)
 unit_update_args.add_argument("unit_name", type=str, required=False)
 unit_update_args.add_argument("level", type=int, required=False)
+unit_post_args.add_argument("build_slots", type=int, required=True)
 unit_update_args.add_argument("attack", type=int, required=False)
 unit_update_args.add_argument("defence", type=int, required=False)
 unit_update_args.add_argument("speed", type=int, required=False)
@@ -188,6 +191,7 @@ class UnitUpdate(Resource):
 
         unit_name = args.get('unit_name')
         level = args.get('level')
+        build_slots = args.get('build_slots')
         attack = args.get('attack')
         defence = args.get('defence')
         speed = args.get('speed')
@@ -220,6 +224,8 @@ class UnitUpdate(Resource):
             unit.unit_name = unit_name
         if level:
             unit.level = level
+        if build_slots:
+            unit.build_slots = build_slots
         if attack:
             unit.attack = attack
         if defence:

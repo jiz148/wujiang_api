@@ -24,6 +24,7 @@ class UnitModel(db.Model):
     unit_id = db.Column(db.Integer, primary_key=True)
     unit_name = db.Column(db.String(100), unique=True)
     level = db.Column(db.Integer)
+    build_slots = db.Column(db.Integer)
     attack = db.Column(db.Integer)
     defence = db.Column(db.Integer)
     speed = db.Column(db.Integer)
@@ -42,6 +43,7 @@ class UnitSchema(ma.Schema):
             'unit_id',
             'unit_name',
             'level',
+            'build_slots',
             'attack',
             'defence',
             'speed',
