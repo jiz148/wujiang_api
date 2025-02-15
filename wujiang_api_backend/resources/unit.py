@@ -17,8 +17,9 @@ class Units(Resource):
     @staticmethod
     def get():
         args = request.args
-        page_num = int(args['pageNum'])
-        page_size = int(args['pageSize'])
+        num_of_units = db.session.query(UnitModel).count() if db.session.query(UnitModel).count() else 1
+        page_num = int(args.get('pageNum', 1))
+        page_size = int(args.get('pageSize', num_of_units))
 
         sort_name = args.get('sortName')
         sort_order = args.get('sortOrder')
