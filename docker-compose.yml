@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=not_needed
+    restart: always
+
+networks:
+  wujiang_network:
+    driver: bridge
+    
