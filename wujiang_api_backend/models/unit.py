@@ -25,6 +25,7 @@ class UnitModel(db.Model):
     unit_name = db.Column(db.String(100), unique=True)
     type = db.Column(db.String(100), unique=True)
     race = db.Column(db.String(100), unique=True)
+    role = db.Column(db.String(100), unique=True)
     level = db.Column(db.Integer)
     build_slots = db.Column(db.Integer)
     attack = db.Column(db.Integer)
@@ -44,6 +45,9 @@ class UnitSchema(ma.Schema):
         fields = [
             'unit_id',
             'unit_name',
+            'type',
+            'race',
+            'role',
             'level',
             'build_slots',
             'attack',

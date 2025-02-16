@@ -112,6 +112,7 @@ unit_post_args.add_argument("unit_name", type=str, required=True)
 unit_post_args.add_argument("level", type=int, required=True)
 unit_post_args.add_argument("type", type=str, required=True)
 unit_post_args.add_argument("race", type=str, required=True)
+unit_post_args.add_argument("role", type=str, required=True)
 unit_post_args.add_argument("build_slots", type=int, required=True)
 unit_post_args.add_argument("attack", type=int, required=True)
 unit_post_args.add_argument("defence", type=int, required=True)
@@ -176,6 +177,7 @@ unit_update_args.add_argument("unit_name", type=str, required=False)
 unit_update_args.add_argument("level", type=int, required=False)
 unit_update_args.add_argument("type", type=str, required=True)
 unit_update_args.add_argument("race", type=str, required=True)
+unit_update_args.add_argument("role", type=str, required=True)
 unit_update_args.add_argument("build_slots", type=int, required=True)
 unit_update_args.add_argument("attack", type=int, required=False)
 unit_update_args.add_argument("defence", type=int, required=False)
@@ -200,6 +202,7 @@ class UnitUpdate(Resource):
         level = args.get('level')
         type = args.get('type')
         race = args.get('race')
+        role = args.get('role')
         build_slots = args.get('build_slots')
         attack = args.get('attack')
         defence = args.get('defence')
@@ -235,6 +238,8 @@ class UnitUpdate(Resource):
             unit.level = level
         if type:
             unit.type = type
+        if role:
+            unit.role = role
         if race:
             unit.race = race
         if build_slots:
