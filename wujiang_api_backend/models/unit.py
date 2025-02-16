@@ -23,6 +23,8 @@ class UnitModel(db.Model):
 
     unit_id = db.Column(db.Integer, primary_key=True)
     unit_name = db.Column(db.String(100), unique=True)
+    type = db.Column(db.String(100), unique=True)
+    race = db.Column(db.String(100), unique=True)
     level = db.Column(db.Integer)
     build_slots = db.Column(db.Integer)
     attack = db.Column(db.Integer)

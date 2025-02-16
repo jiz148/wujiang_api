@@ -9,6 +9,7 @@ class SpellModel(db.Model):
 
     spell_id = db.Column(db.Integer, primary_key=True)
     spell_name = db.Column(db.String(100), unique=True)
+    spell_cost = db.Column(db.Integer)
     spell_description = db.Column(db.String(1000), default='')
 
 
@@ -19,5 +20,6 @@ class SpellSchema(ma.Schema):
         fields = [
             'spell_id',
             'spell_name',
+            'spell_cost',
             'spell_description'
         ]

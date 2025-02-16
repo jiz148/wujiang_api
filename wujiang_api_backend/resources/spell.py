@@ -53,6 +53,7 @@ class Spells(Resource):
 
 spell_post_args = reqparse.RequestParser()
 spell_post_args.add_argument("name", type=str, required=True)
+spell_post_args.add_argument("cost", type=int, required=True)
 spell_post_args.add_argument("description", type=str, required=True)
 
 
@@ -66,6 +67,7 @@ class Spell(Resource):
 
         spell = SpellModel(
             spell_name=args['name'],
+            spell_cost=args['cost'],
             spell_description=args['description'],
         )
 
@@ -117,6 +119,7 @@ class SpellDetail(Resource):
 spell_put_args = reqparse.RequestParser()
 spell_put_args.add_argument("spell_id", type=str, required=True)
 spell_put_args.add_argument("name", type=str, required=True)
+spell_put_args.add_argument("cost", type=int, required=True)
 spell_put_args.add_argument("description", type=str, required=True)
 
 
@@ -135,6 +138,7 @@ class SpellUpdate(Resource):
             if db.session.query(SpellModel).filter(SpellModel.spell_name == args['name']).all():
                 abort(409, msg='spell name already exists')
         spell.spell_name = args['name']
+        spell.spell_cost = args['cost']
         spell.spell_description = args['description']
 
         db.session.commit()
